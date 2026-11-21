@@ -3,8 +3,12 @@ from __future__ import annotations
 
 import io
 import json
+from html import escape
 
 import streamlit as st
+
+st.set_page_config(page_title="TruthLayer - automated fact-check", page_icon="TL", layout="wide")
+
 import os
 try:
     for _k in ("GEMINI_API_KEY", "GOOGLE_API_KEY"):
@@ -17,8 +21,6 @@ from pypdf import PdfReader
 from truthlayer.extract import find_claims
 from truthlayer.verify import verify_all, VERIFIED, INACCURATE, FALSE
 from truthlayer.report import summarise, rows, to_csv
-
-st.set_page_config(page_title="TruthLayer - automated fact-check", page_icon="TL", layout="wide")
 
 st.markdown("""
 <style>
@@ -82,15 +84,15 @@ if data:
         st.divider()
         for r in rows(claims, verdicts):
             cls = {VERIFIED: "v", INACCURATE: "i", FALSE: "f"}.get(r["verdict"], "i")
-            st.markdown('<p class="claim">%s</p>' % r["claim"], unsafe_allow_html=True)
+            st.markdown('<p class="claim">%s</p>' % escape(str(r["claim"])), unsafe_allow_html=True)
             st.markdown('<span class="badge %s">%s</span>' % (cls, r["verdict"]), unsafe_allow_html=True)
             if r["real_value"] is not None:
                 st.markdown('<p class="real">Real: %s%s - %s</p>' % (
                     "{:,.2f}".format(r["real_value"]).rstrip("0").rstrip("."),
-                    " (%s)" % r["real_year"] if r["real_year"] else "", r["note"]),
+                    " (%s)" % r["real_year"] if r["real_year"] else "", escape(str(r["note"]))),
                     unsafe_allow_html=True)
             else:
-                st.markdown('<p class="real">%s</p>' % r["note"], unsafe_allow_html=True)
+                st.markdown('<p class="real">%s</p>' % escape(str(r["note"])), unsafe_allow_html=True)
             if r["source_url"]:
                 st.markdown('<p class="src">Source: <a href="%s" target="_blank">%s</a></p>'
                             % (r["source_url"], r["source"]), unsafe_allow_html=True)
