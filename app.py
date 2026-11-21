@@ -10,11 +10,18 @@ import streamlit as st
 st.set_page_config(page_title="TruthLayer - automated fact-check", page_icon="TL", layout="wide")
 
 import os
-try:
-    for _k in ("GEMINI_API_KEY", "GOOGLE_API_KEY"):
-        if _k in st.secrets and not os.environ.get(_k):
-            os.environ[_k] = st.secrets[_k]
-except Exception:  # no secrets file
+_secret_files = [
+    os.path.expanduser("~/.streamlit/secrets.toml"),
+    os.path.join(os.getcwd(), ".streamlit", "secrets.toml"),
+]
+if any(os.path.exists(_f) for _f in _secret_files):
+    try:
+        for _k in ("GEMINI_API_KEY", "GOOGLE_API_KEY"):
+            if _k in st.secrets and not os.environ.get(_k):
+                os.environ[_k] = st.secrets[_k]
+    except Exception:  # unreadable secrets file
+        pass
+if False:
     pass
 from pypdf import PdfReader
 
